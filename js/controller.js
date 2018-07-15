@@ -62,7 +62,7 @@ wordApp.controller('WordListController', function ($scope,$http,cfpLoadingBar) {
 				words = shuffle(words);
 			}
 
-			$scope.worJSON.parse(words);
+			$scope.words=JSON.parse(words);
 			cfpLoadingBar.complete();
 		}
 		catch(e){
