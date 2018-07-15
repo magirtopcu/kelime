@@ -5,9 +5,29 @@ wordApp.controller('WordListController', function ($scope,$http,cfpLoadingBar) {
 	
   	cfpLoadingBar.start();
 	 var words =localStorage.getItem("words");
+	 var settings = JSON.parse(localStorage.getItem('settings'));
+	 if(!settings){
+	 	settings = {shuffled : false};
+	 	localStorage.setItem("settings", JSON.stringify(settings));
+	 }
 	 
+	 var  shuffle=function(a){
+		    var j, x, i;
+		    for (i = a.length - 1; i > 0; i--) {
+		        j = Math.floor(Math.random() * (i + 1));
+		        x = a[i];
+		        a[i] = a[j];
+		        a[j] = x;
+		    }
+		    return a;
+		}
+
 	 var getWordsFromSource=function(){
 	 	$http.get('word.json').success(function(data) {
+	 		if(settings.shuffled){
+	 			data = shuffle(data);
+	 		}
+	 			
                 for(var i=0;i<data.length;i++){
                         
                         data[i].selected=0;
@@ -49,6 +69,8 @@ wordApp.controller('WordListController', function ($scope,$http,cfpLoadingBar) {
 	}
 	  $scope.details={};
 	  $scope.showMeanings=true;
+	  $scope.shuffledList=settings.shuffled;
+
 	  $scope.pageSize=10;
 	  $scope.markWordAsRead=function(){
 	  	
@@ -68,6 +90,11 @@ wordApp.controller('WordListController', function ($scope,$http,cfpLoadingBar) {
 	  	  $scope.pageSize+=10;
 		 
 	  };
+	  $scope.toggleShuffle = function(){
+	  	  settings.shuffled = $scope.shuffledList;
+	  	  localStorage.setItem("settings",JSON.stringify(settings));
+	  	  location.reload();
+	  }
 	  
 	  
 		 window.jsonp_data=function(arg){
@@ -89,7 +116,7 @@ wordApp.controller('WordListController', function ($scope,$http,cfpLoadingBar) {
 			  alert("please refresh page");}
 		  }; 
 		 
-		 var url="http://glosbe.com/gapi/translate?from=en&dest=tr&format=json&pretty=false&callback=jsonp_data&phrase="; 
+		 var url="https://glosbe.com/gapi/translate?from=en&dest=tr&format=json&pretty=false&callback=jsonp_data&phrase="; 
 		 $scope.lookFor=function(word,e){
 			  e.stopPropagation();
 			  if($scope.details[word.id]){
