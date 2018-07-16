@@ -10,6 +10,9 @@ wordApp.controller('WordListController', function ($scope,$http,cfpLoadingBar) {
 	 	settings = {shuffled : false};
 	 	localStorage.setItem("settings", JSON.stringify(settings));
 	 }
+
+	 var memorized = 0;
+
 	 
 	 var  shuffle=function(a){
 		    var j, x, i;
@@ -24,15 +27,18 @@ wordApp.controller('WordListController', function ($scope,$http,cfpLoadingBar) {
 
 	 var getWordsFromSource=function(){
 	 	$http.get('word.json').success(function(data) {
-	 		if(settings.shuffled){
-	 			data = shuffle(data);
-	 		}
+	 		
 	 			
                 for(var i=0;i<data.length;i++){
                         
                         data[i].selected=0;
                          data[i].id="_id"+i;
-                        }
+                  }
+            if(settings.shuffled){
+	 			data = shuffle(data);
+	 		}
+
+	 		$scope.rate = 0 +" / "+ data.length;
                 
     		$scope.words = data;
 			save();
@@ -63,6 +69,11 @@ wordApp.controller('WordListController', function ($scope,$http,cfpLoadingBar) {
 			if(settings.shuffled){
 				words = shuffle(words);
 			}
+			memorized = words.filter(function(item){
+				return item.selected
+			}).length;
+
+			$scope.rate = memorized +" / " + words.length;
 
 			$scope.words= words;
 			cfpLoadingBar.complete();
@@ -82,6 +93,14 @@ wordApp.controller('WordListController', function ($scope,$http,cfpLoadingBar) {
 	  $scope.markWordAsRead=function(){
 	  	
 		  this.word.selected=!this.word.selected;
+
+		  if(this.word.selected){
+		  	memorized++;
+		  }
+		  else{
+		  	memorized--;
+		  }
+		  $scope.rate = memorized+" / "+ $scope.words.length;
 		  save();
 	
 	  };
